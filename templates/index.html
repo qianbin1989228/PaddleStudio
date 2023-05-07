@@ -1,0 +1,1181 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>图形化深度学习开发平台</title>
+    <link rel="shortcut icon" href="/static/img/favicon.ico">
+    <link href="/static/css/main.css" rel="stylesheet" />
+    <script src="/static/js/main.js"></script>
+</head>
+
+<!-- 获取服务器地址 -->
+<script>
+    var str_srv_url = '{{ server_url | safe }}';
+</script>
+
+<body onload="load_projects()" oncontextmenu="self.event.returnValue=false" onkeypress="dispatch_key_press()">
+    <!--popupmenu-->
+    <div id="popupmenu_project" class="popupmenu_project">
+        <input type="hidden" id="popup_menu_project_id">
+        <!--<input type="hidden" id="popup_menu_project_type">-->
+        <table border="0" width="100%" height="100%" cellspacing="0">
+            <tr>
+                <td style="cursor:default; border:solid #ccc 1px;" align="center" onclick="delete_project()">删除项目</td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="popupmenu_dataset" class="popupmenu_dataset">
+        <input type="hidden" id="popup_menu_dataset_id">
+        <table border="0" width="100%" height="100%" cellspacing="0">
+            <tr>
+                <td style="cursor:default; border:solid #ccc 1px;" align="center" onclick="delete_dataset(this)">删除数据集
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="popupmenu_task" class="popupmenu_task">
+        <input type="hidden" id="popup_menu_task_id">
+        <input type="hidden" id="popup_menu_task_status">
+        <table border="0" width="100%" height="100%" cellspacing="0">
+            <tr>
+                <td style="cursor:default; border:solid #ccc 1px;" align="center" onclick="delete_task(this)">删除任务</td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="popupmenu_model" class="popupmenu_model">
+        <input type="hidden" id="popup_menu_model_id">
+        <table border="0" width="100%" height="100%" cellspacing="0">
+            <tr>
+                <td style="cursor:default; border:solid #ccc 1px;" align="center" onclick="delete_model(this)">删除模型</td>
+            </tr>
+        </table>
+    </div>
+
+    <!--main menu-->
+    <div class='nav'>
+        <ul>
+            <!--<li><div class="brand"> <a href="https://www.paddlepaddle.org.cn/paddle/paddleX"><img src="logo.png" alt="PaddleX Logo"></a></div></li>
+    <li>
+      <div class="navbar-btn" style="padding: 0; padding-top: 10px;">
+        <button type="button" class="btn-toggle-fullwidth btn-toggle-mx"><img src="img/left.png" height="40px" alt=""></button>
+      </div>
+    </li>
+    -->
+            <li><a href='https://github.com/PuhuaCloud/PaddleStudio'>PaddleStudio 1.0</a></li>
+            <li><a href='#'>数据集管理</a>
+                <ul>
+                    <li onclick="show_create_dataset_win_modal(this)"><a href='#'>创建数据集</a></li>
+                    <li onclick="load_datasets()"><a href='#'>查看数据集</a></li>
+                </ul>
+            </li>
+            <li><a href='#'>项目管理</a>
+                <ul>
+                    <li onclick="show_create_project_win_modal(this)"><a href='#'>创建项目</a></li>
+                    <li onclick="load_projects()"><a href='#'>查看项目</a></li>
+                </ul>
+            </li>
+            <li><a href='#'>任务管理</a>
+                <ul>
+                    <li onclick="load_tasks()"><a href='#'>查看所有任务</a></li>
+                </ul>
+            </li>
+            <li><a href='#'>模型管理</a>
+                <ul>
+                    <!--<li><a href='#'>预训练模型</a></li>-->
+                    <li onclick="load_models()"><a href='#'>已发布模型</a></li>
+                </ul>
+            </li>
+            <li onclick="show_server_info(this)"><a href='#'>配置服务器</a></li>
+            <li onclick="contact_us()"><a href='#'>联系我们</a></li>
+        </ul>
+    </div>
+    <!--nav bar-->
+    <table width="100%" height="35px" align="center" cellspacing="1px" id="table_nav_bar" cellpadding="0"
+        cellspacing="0" style="border-collapse:collapse;">
+        <tr style="background-color:#EBEBEB">
+            <td style="width: 15px;"></td>
+            <td align="left"><a href="javascript:load_projects()">全部项目</a></td>
+        </tr>
+    </table>
+    <br>
+    <!--nav bar-->
+    <div style="text-align:center;clear:both;margin-top:10px">
+
+        <div id="div_demo_title">
+            <h2>
+                <font color="#0000cd">欢迎使用 PaddleStudio</font>
+            </h2>
+        </div>
+
+        <table width="100%" height="40px" align="center" cellspacing="1px" id="table_create_new">
+            <tr>
+                <td style="width: 5px;"></td>
+                <td>
+                    <div class="btn" style="width: 120px; height: 38px; float:left; background: #007FFF;">
+                        <input type="button" id="btn_create_new"
+                            style="width: 120px; height: 38px; background: #007FFF; " value="新建项目"
+                            onclick="javascript:create_new(this);" />
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!--show projects/tasks/datasets/models information-->
+        <table width="100%" height="100%" align="center" cellspacing="20px" id="table_contents"
+            style="font-size:18px; border:0px; solid #cad9ea;">
+            <tr>
+                <td>
+                    <div id="draw-border">
+                        <view_item id="btn_set_server" onclick="show_server_info(this)"
+                            style="width: 330px; height: 90px; align: center"><br>
+                            <font color="red">连接服务器失败，点击设置服务器信息</font>
+                        </view_item>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!--All hidden popup windows-->
+        <!--服务器配置弹出窗口-->
+        <div id="input_win_cfg_server"
+            style="display:none;border:1px solid #cccccc;height:470px;width:40%;position:fixed;top:24%;left:24%;z-index:10;background:white;">
+            <!--title-->
+            <div
+                style="position:relative;background-color: #529EFF;min_height:30px; max-height: 60px;border-bottom: 1px solid #a4acb9;padding:2px 2px;">
+                <br>
+                <div style="font-size: 20px;">服务器信息</div><br>
+            </div>
+            <br />
+
+            <!--input information-->
+            <table width="100%" align="center" id="table_server_info">
+                <tr>
+                    <td>
+                        <div style="font-size: 14px;">服务器操作系统：</div>
+                    </td>
+                    <td>
+                        <br>
+                        <div style="font-size: 14px;">{{server_info.systemName}} {{server_info.systemVersion}} {{server_info.systemArch}}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">Python版本：</div>
+                    </td>
+                    <td>
+                        <br>
+                        <div style="font-size: 14px;">Python {{server_info.pythonVersion}}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">CUDA版本：</div>
+                    </td>
+                    <td>
+                        <br>
+                        <div style="font-size: 14px;">CUDA {{server_info.cudaVersion}}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">CUDNN版本：</div>
+                    </td>
+                    <td>
+                        <br>
+                        <div style="font-size: 14px;">CUDNN {{server_info.cudnnVersion}}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">PaddlePaddle版本：</div>
+                    </td>
+                    <td>
+                        <br>
+                        <div style="font-size: 14px;">PaddlePaddle {{server_info.paddleVersion}}</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">配置服务器地址：</div>
+                    </td>
+                    <td>
+                        <br>
+                        <input type="hidden" id="workspace_id">
+                        <input id="server_url_text"
+                            style="width:85% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+            </table>
+            <br>
+            <!--buttons-->
+            <div style="margin-top: 15px; padding: 19px 20px 20px; text-align: right; border-top: 1px solid #e5e5e5;">
+                <!--下载示例项目-->
+                <div class="btn" id="div_btn_download_demo"><input type="button" id="btn_download_demo"
+                        style="background:#008F00;" value="下载示例项目" onclick="download_demo_btn_proc(this);" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_cancel_cfg_srv" style="background:#529EFF;" value="取消"
+                        onclick="hide_server_info(this);" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_cfg_srv" value="设置" onclick="set_server_addr(this);" />
+                </div>
+            </div>
+        </div>
+
+        <div id="input_win_cfg_server_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0; z-index:9;background: silver;">
+        </div>
+        <!--服务器配置弹出窗口-->
+
+        <!--创建项目弹出窗口-->
+        <div id="input_win_create_project"
+            style="display:none;border:1px solid #cccccc;height:420px;width:50%;position:fixed;top:24%;left:24%;z-index:10;background:white;">
+            <!--title-->
+            <div
+                style="position:relative;background-color: #529EFF;min_height:30px; max-height: 60px;border-bottom: 1px solid #a4acb9;padding:2px 2px;">
+                <br>
+                <div style="font-size: 20px;">新 建 项 目</div><br>
+            </div>
+            <br />
+            <!--input informations-->
+            <table width="100%" align="center" id="table_create_prj">
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">项目名称:</div>
+                    </td>
+                    <td>
+                        <br>
+                        <input type="hidden" id="workspace_id_for_crt_prj">
+                        <input id="project_name_text" value="新建项目"
+                            style="width:85% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">项目类型:</div>
+                    </td>
+                    <td>
+                        <br>
+                        <select id="project_type_text" onchange="change_create_project_type(this);"
+                            style="width:89% ;height:30px;Float:left;padding: 4px 8px;margin-left: 4px;">
+                            <option value="classification">图像分类</option>
+                            <option value="detection">目标检测</option>
+                            <option value="instance_segmentation">实例分割</option>
+                            <option value="segmentation">语义分割</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">数据集:</div>
+                    </td>
+                    <td>
+                        <br>
+                        <select id="create_project_dataset_id_text"
+                            style="width:89% ;height:30px;Float:left;padding: 4px 8px;margin-left: 4px;">
+                            <option value="0">请选择项目对应数据集</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">项目描述:</div>
+                    </td>
+                    <td>
+                        <br>
+                        <input id="project_desc_text"
+                            style="width:85% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+            </table>
+            <br>
+            <!--buttons-->
+            <div style="margin-top: 15px; padding: 19px 20px 20px; text-align: right; border-top: 1px solid #e5e5e5;">
+                <div class="btn"><input type="button" id="btn_cancel_create_prj" style="background:#529EFF;" value="取消"
+                        onclick="hide_create_prj_win_modal(this);" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_create_prj" value="创建" onclick="create_project(this);" />
+                </div>
+            </div>
+        </div>
+        <div id="input_win_create_project_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0; z-index:9;background: silver;">
+        </div>
+        <!--创建项目弹出窗口-->
+
+        <!--创建数据集弹出窗口-->
+        <div id="input_win_create_dataset"
+            style="display:none;border:1px solid #cccccc;height:370px;width:50%;position:fixed;top:24%;left:24%;z-index:10;background:white;">
+            <!--title-->
+            <div
+                style="position:relative;background-color: #529EFF;min_height:30px; max-height: 60px;border-bottom: 1px solid #a4acb9;padding:2px 2px;">
+                <br>
+                <div style="font-size: 20px;">新 建 数 据 集</div><br>
+            </div>
+            <br />
+            <!--input informations-->
+            <table width="100%" align="center" id="table_create_dataset">
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">数据集名称:</div>
+                    </td>
+                    <td>
+                        <br>
+                        <input id="dataset_name_text" value="新建数据集"
+                            style="width:85% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">数据集类型:</div>
+                    </td>
+                    <td>
+                        <br>
+                        <select id="dataset_type_text"
+                            style="width:89% ;height:30px;Float:left;padding: 4px 8px;margin-left: 4px;">
+                            <option value="classification">图像分类</option>
+                            <option value="detection">目标检测</option>
+                            <option value="instance_segmentation">实例分割</option>
+                            <option value="segmentation">语义分割</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">数据集描述:</div>
+                    </td>
+                    <td>
+                        <br>
+                        <input id="dataset_desc_text"
+                            style="width:85% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+            </table>
+            <br>
+            <!--buttons-->
+            <div style="margin-top: 15px; padding: 19px 20px 20px; text-align: right; border-top: 1px solid #e5e5e5;">
+                <div class="btn"><input type="button" id="btn_cancel_create_dataset" style="background:#529EFF;"
+                        value="取消" onclick="hide_create_dataset_win_modal(this);" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_create_dataset" value="创建"
+                        onclick="create_dataset(this);" /></div>
+            </div>
+        </div>
+        <div id="input_win_create_dataset_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0; z-index:9;background: silver;">
+        </div>
+        <!--创建项目弹出窗口-->
+
+        <!--数据集导入弹出窗口-->
+        <div id="input_win_import_dataset"
+            style="display:none;border:1px solid #cccccc;height:260px;width:50%;position:fixed;top:24%;left:24%;z-index:10;background:white;">
+            <!--title-->
+            <div
+                style="position:relative;background-color: #529EFF;min_height:30px; max-height: 60px;border-bottom: 1px solid #a4acb9;padding:2px 2px;">
+                <br>
+                <div style="font-size: 20px;">导入数据集</div><br>
+            </div>
+            <br />
+            <!--input informations-->
+            <table width="100%" align="center" id="table_import_dataset">
+                <tr>
+                    <td width="30%"><br>
+                        <div style="font-size: 14px;">数据集路径（服务器端）：</div>
+                    </td>
+                    <td>
+                        <br>
+                        <input type="hidden" id="import_dataset_id" value="">
+                        <input id="import_dataset_path_text"
+                            style="width:85% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+            </table>
+            <br>
+            <!--buttons-->
+            <div style="margin-top: 15px; padding: 19px 20px 20px; text-align: right; border-top: 1px solid #e5e5e5;">
+                <div class="btn"><input type="button" id="btn_cancel_import_dataset" style="background:#529EFF;"
+                        value="取消" onclick="hide_import_dataset_win_modal(this);" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_import_dataset" value="导入"
+                        onclick="import_dataset(this);" /></div>
+            </div>
+        </div>
+        <div id="input_win_import_dataset_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0; z-index:9;background: silver;">
+        </div>
+        <!--数据集导入弹出窗口-->
+
+        <!--数据集切分弹出窗口-->
+        <div id="input_win_split_dataset"
+            style="display:none;border:1px solid #cccccc;height:370px;width:50%;position:fixed;top:24%;left:24%;z-index:15;background:white;">
+            <!--title-->
+            <div
+                style="position:relative;background-color: #529EFF;min_height:30px; max-height: 60px;border-bottom: 1px solid #a4acb9;padding:2px 2px;">
+                <br>
+                <div style="font-size: 20px;">切分数据集</div><br>
+            </div>
+            <br />
+            <!--input informations-->
+            <table width="100%" align="center" id="table_split_dataset">
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">训练集(%)：</div>
+                    </td>
+                    <td>
+                        <br>
+                        <input type="hidden" id="split_dataset_id" value="">
+                        <input id="split_dataset_train_percent" value="70"
+                            oninput="value=value.replace(/(^\.|[^\d\.])/g,'').replace('.','$#$').replace(/\./g,'').replace('$#$','.').replace(/^\d{3,}.*/,'100')"
+                            style="width:85% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">验证集(%)：</div>
+                    </td>
+                    <td>
+                        <br>
+                        <input id="split_dataset_val_percent" value="20"
+                            oninput="value=value.replace(/(^\.|[^\d\.])/g,'').replace('.','$#$').replace(/\./g,'').replace('$#$','.').replace(/^\d{3,}.*/,'100')"
+                            style="width:85% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><br>
+                        <div style="font-size: 14px;">测试集(%)：</div>
+                    </td>
+                    <td>
+                        <br>
+                        <input id="split_dataset_test_percent" value="10"
+                            oninput="value=value.replace(/(^\.|[^\d\.])/g,'').replace('.','$#$').replace(/\./g,'').replace('$#$','.').replace(/^\d{3,}.*/,'100')"
+                            style="width:85% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+            </table>
+            <br>
+            <!--buttons-->
+            <div style="margin-top: 15px; padding: 19px 20px 20px; text-align: right; border-top: 1px solid #e5e5e5;">
+                <div class="btn"><input type="button" id="btn_cancel_split_dataset" style="background:#529EFF;"
+                        value="取消" onclick="hide_split_dataset_win_modal(this);" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_split_dataset" value="切分"
+                        onclick="split_dataset(this);" /></div>
+            </div>
+        </div>
+        <div id="input_win_split_dataset_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0; z-index:9;background: silver;">
+        </div>
+        <!--数据集导入弹出窗口-->
+
+        <!--创建任务弹出窗口-->
+        <div id="input_win_create_task"
+            style="display:none;border:1px solid #cccccc;height:400px;width:50%;position:fixed;top:24%;left:24%;z-index:15;background:white;">
+            <!--title-->
+            <div
+                style="position:relative;background-color: #529EFF;min_height:30px; max-height: 60px;border-bottom: 1px solid #a4acb9;padding:2px 2px;">
+                <br>
+                <div style="font-size: 20px;">任务详细信息</div><br>
+                <input type="hidden" id="create_task_project_id" value="">
+                <input type="hidden" id="create_task_project_type" value="">
+                <input type="hidden" id="create_task_hidden_task_id" value="">
+            </div>
+            <!--input informations-->
+            <div class="scroll-content">
+                <div class="table-parms-head">
+                    <table width="100%" align="center" id="table_create_task_head">
+                        <colgroup>
+                            <col style="font-size: 14px;" />
+                            <col />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>参数值</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="table-parms-body">
+                    <table width="100%" align="center" id="table_create_task">
+                        <colgroup>
+                            <col style="font-size: 14px;" />
+                            <col />
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <td>key</td>
+                                <td>value</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <br>
+            <!--buttons-->
+            <div style="margin-top: 15px; padding: 19px 20px 20px; text-align: right; border-top: 1px solid #e5e5e5;">
+                <div class="btn"><input type="button" id="btn_cancel_create_task" style="background:#529EFF;" value="取消"
+                        onclick="hide_create_task_win_modal(this);" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_create_task" value="创建并启动训练" onclick="create_task();" />
+                </div>
+            </div>
+        </div>
+        <div id="input_win_create_task_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0; z-index:14;background: silver;">
+        </div>
+        <!--创建任务弹出窗口-->
+
+        <!--任务状态窗口-->
+        <div id="task_detail_info"
+            style="display:none;border:1px solid #cccccc;height:420px;width:50%;position:fixed;top:24%;left:24%;z-index:10;background:white;">
+            <!--title-->
+            <div
+                style="position:relative;background-color: #529EFF;min_height:30px; max-height: 60px;border-bottom: 1px solid #a4acb9;padding:2px 2px;">
+                <br>
+                <div style="font-size: 20px;">查看任务状态</div><br>
+            </div>
+            <br />
+            <!--input informations-->
+            <table width="100%" align="center" id="table_task_detail_info">
+                <tr>
+                    <td width="25%">
+                        <div style="font-size: 14px;">任务状态：</div>
+                    </td>
+                    <td>
+                        <input type="hidden" id="task_detail_id">
+                        <input id="task_detail_status_text"
+                            style="width:95% ;height:20px;Float:left;padding: 4px 8px; margin-left: 4px; border: none; outline: none;"
+                            type="text" readonly="readonly" />
+                    </td>
+                    <td>&nbsp&nbsp</td>
+                </tr>
+                <tr>
+                    <td width="25%">
+                        <div style="font-size: 14px;">训练进度：</div>
+                    </td>
+                    <td>
+                        <div class="progress"> <span id="task_detail_status_progress_bar_value" class="green"
+                                style="width: 0%;"><span id="task_detail_status_progress_bar">0%</span></span></div>
+                    </td>
+                    <td>&nbsp&nbsp</td>
+                </tr>
+                <tr>
+                    <td width="25%">
+                        <div style="font-size: 14px;">运行时间：</div>
+                    </td>
+                    <td>
+                        <input id="task_detail_running_duration_text"
+                            style="width:95% ;height:20px;Float:left;padding: 4px 8px; margin-left: 4px; border: none; outline: none;"
+                            type="text" readonly="readonly" />
+                    </td>
+                    <td>&nbsp&nbsp</td>
+                </tr>
+                <tr>
+                    <td width="25%">
+                        <div style="font-size: 14px;">VDL可视化数据：</div>
+                    </td>
+                    <td>
+                        <input id="task_detail_vdl_text" value="点击查看" onclick="open_task_vdl_window(this);"
+                            style="color: #0000cd; width:95% ;height:20px;Float:left;padding: 4px 8px; margin-left: 4px; border: none; outline: none;"
+                            type="text" readonly="readonly" />
+                    </td>
+                    <td>&nbsp&nbsp</td>
+                </tr>
+                <tr>
+                    <td width="25%">
+                        <div style="font-size: 14px;">任务信息：</div>
+                    </td>
+                    <td>
+                        <textarea id="task_detail_log_text" style="width:95% ;height:100px; resize:none"
+                            readonly="readonly"></textarea>
+                    </td>
+                    <td>&nbsp&nbsp</td>
+                </tr>
+            </table>
+            <!--buttons-->
+            <div style="margin-top: 15px; padding: 19px 20px 20px; text-align: right; border-top: 1px solid #e5e5e5;">
+                <!--停止任务，当任务运行中可点击-->
+                <div class="btn" id="div_btn_stop_task" style="visibility:hidden;"><input type="button"
+                        id="btn_stop_task_info" style="background:#FF2600;" value="中止训练" onclick="stop_task();" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_cancel_task_info" style="background:#529EFF;" value="取消"
+                        onclick="hide_task_detail_info_win_modal();" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_next_task_info" value="关闭"
+                        onclick="task_next_step_process(this);" /></div>
+            </div>
+        </div>
+        <div id="task_detail_info_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0;z-index:9;background: silver;">
+        </div>
+        <!--任务状态窗口-->
+
+        <!--评估&导出模型窗口-->
+        <div id="input_win_evaluate_export_model"
+            style="display:none;border:1px solid #cccccc;height:260px;width:50%;position:fixed;top:24%;left:24%;z-index:10;background:white;">
+            <!--title-->
+            <div
+                style="position:relative;background-color: #529EFF;min_height:30px; max-height: 60px;border-bottom: 1px solid #a4acb9;padding:2px 2px;">
+                <br>
+                <div style="font-size: 20px;">模型评估&导出</div><br>
+            </div>
+            <br />
+            <!--input informations-->
+            <table width="100%" align="center" id="table_evaluate_export_model">
+                <tr>
+                    <td width="20%"><br>
+                        <div style="font-size: 14px;">导出路径：</div>
+                    </td>
+                    <td>
+                        <br>
+                        <input type="hidden" id="evaluate_export_task_id" value="">
+                        <input type="hidden" id="evaluate_export_task_project_id" value="">
+                        <input id="export_model_path_text"
+                            style="width:85% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+            </table>
+            <br>
+            <!--buttons-->
+            <div style="margin-top: 15px; padding: 19px 20px 20px; text-align: right; border-top: 1px solid #e5e5e5;">
+                <!--评估任务-->
+                <div class="btn"><input type="button" id="btn_cancel_evaluate_export" style="background:#529EFF;"
+                        value="取消" onclick="hide_evaluate_export_win_modal(this);" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn" id="div_btn_test_task_model"><input type="button" id="btn_test_task_model"
+                        style="background:#942193;" value="模型测试" onclick="test_task_model(this);" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn" id="div_btn_evaluate_task"><input type="button" id="btn_evaluate_task_info"
+                        style="background:#008F00;" value="启动评估" onclick="evaluate_task(this);" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_close_evaluate_export" value="导出"
+                        onclick="export_model(this);" /></div>
+            </div>
+        </div>
+        <div id="input_win_evaluate_export_model_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0; z-index:9;background: silver;">
+        </div>
+        <!--评估&导出模型窗口-->
+
+        <!--浏览数据集弹出窗口-->
+        <div id="win_browse_dataset"
+            style="display:none;border:1px solid #cccccc;height:520px;width:60%;position:fixed;top:16%;left:20%;z-index:10;background:white;">
+            <!--title-->
+            <div
+                style="position:relative;background-color: #529EFF;min_height:30px; max-height: 60px;border-bottom: 1px solid #a4acb9;padding:2px 2px;">
+                <br>
+                <div style="font-size: 20px;">浏 览 数 据 集</div><br>
+            </div>
+            <br />
+            <!--show dataset informations-->
+            <table width="100%" align="center" id="table_create_dataset">
+                <tr>
+                    <td>
+                        <div style="font-size: 14px;">数据集名称:</div>
+                    </td>
+                    <td>
+                        <input type="hidden" id="browse_dataset_id" value="">
+                        <input id="browse_dataset_name_text" value=""
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text"
+                            readonly="readonly" />
+                    </td>
+                    <td>
+                        <div style="font-size: 14px;">数据集类型:</div>
+                    </td>
+                    <td>
+                        <input id="browse_dataset_type_text" value=""
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text"
+                            readonly="readonly" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div style="font-size: 14px;">数据集描述:</div>
+                    </td>
+                    <td colspan="3">
+                        <input id="browse_dataset_desc_text"
+                            style="width:96% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text"
+                            readonly="readonly" />
+                    </td>
+                </tr>
+            </table>
+            <br>
+            <!--数据预览-->
+            <div class="scroll-content">
+                <div>
+                    <table width="100%" align="center" id="table_browse_dataset_head">
+                        <tr>
+                            <th width="50%">全部标签</th>
+                            <th width="50%">
+                                <select id="sel_dataset_view_type" onchange="change_dataset_view_type(this);"
+                                    style="width:180px;height:30px;Float:left;">
+                                    <option value="all">查看全量数据</option>
+                                    <option value="train">查看训练集</option>
+                                    <option value="evaluate">查看验证集</option>
+                                    <option value="test">查看测试集</option>
+                                </select>
+                                全部数据预览 &nbsp;&nbsp&nbsp;&nbsp&nbsp;&nbsp
+                                <label id="dataset_chk_show_label_txt"><input type="checkbox"
+                                        id="dataset_chk_show_label" value="显示标注" onclick="show_dataset_labels()"
+                                        style="height: 12px;width: 12px;">&nbsp;显示标注</label>
+                            </th>
+                        </tr>
+                    </table>
+                </div>
+                <div>
+                    <table width="100%" align="center" id="table_browse_dataset">
+                        <tr>
+                            <td>
+                                <!--标签-->
+                                <div class="table-dataset-labels">
+                                    <table width="100%" align="center" id="table_dataset_labels">
+                                        <colgroup>
+                                            <col style="font-size: 14px;" />
+                                            <col />
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <td>标签名称</td>
+                                                <td>总数据量</td>
+                                                <td>训练数据集</td>
+                                                <td>验证数据集</td>
+                                                <td>测试数据集</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!--标签-->
+                            </td>
+                            <td>
+                                <!--图像预览-->
+                                <div class="table-dataset-labels">
+                                    <table width="100%" align="center" id="table_dataset_imgs">
+                                        <tr>
+                                            <td><img id="dataset_img_1" ondblclick="zoom_image(this)" align="center"
+                                                    style="border:1px #D6D6D6 solid;" height="150" width="150"
+                                                    hspace="0" vspace="0" /></td>
+                                            <td><img id="dataset_img_2" ondblclick="zoom_image(this)" align="center"
+                                                    style="border:1px #D6D6D6 solid;" height="150" width="150"
+                                                    hspace="0" vspace="0" /></td>
+                                            <td><img id="dataset_img_3" ondblclick="zoom_image(this)" align="center"
+                                                    style="border:1px #D6D6D6 solid;" height="150" width="150"
+                                                    hspace="0" vspace="0" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td id="dataset_img_1_file_name">img_file</td>
+                                            <td id="dataset_img_2_file_name">img_file</td>
+                                            <td id="dataset_img_3_file_name">img_file</td>
+                                        </tr>
+                                    </table>
+                                    <table width="100%" align="center" id="table_dataset_pages">
+                                        <tr>
+                                            <td style="cursor:pointer;" onclick="dataset_pre_page()">上一页</td>
+                                            <td id="dataset_page_info">第 页/共 页
+                                            <td>
+                                            <td style="cursor:pointer;" onclick="dataset_next_page()">下一页</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <br>
+            <!--buttons-->
+            <div style="margin-top: 15px; padding: 19px 20px 20px; text-align: right; border-top: 1px solid #e5e5e5;">
+                <div class="btn"><input type="button" id="btn_cancel_browse_dataset" style="background:#529EFF;"
+                        value="取消" onclick="hide_browse_dataset_win_modal(this);" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_split_dataset" style="background:#008F00;" value="重新切分"
+                        onclick="re_split_dataset(this);" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_close_browse_dataset" value="关闭"
+                        onclick="hide_browse_dataset_win_modal(this);" /></div>
+            </div>
+        </div>
+        <div id="win_browse_dataset_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0; z-index:9;background: silver;">
+        </div>
+        <!--数据集预览窗口-->
+
+        <!--浏览原图弹出窗口-->
+        <div id="win_browse_img"
+            style="display:none;border:1px solid #cccccc;height:610px;width:60%;position:fixed;top:15%;left:20%;z-index:15;background:white;">
+            <table width="100%" align="center" id="table_img">
+                <tr>
+                    <td width="15%" align="center">
+                        <arrow class="left" id="arrow_pre_img" onclick="img_arrow_click(this)"></arrow>
+                    </td>
+                    <td width="70%">
+                        <img id="dataset_browse_img" onclick="hide_zoom_img(this)" src="" align="center"
+                            style="border:1px #D6D6D6 solid;" height="600" width="600" hspace="0" vspace="0" />
+                    </td>
+                    <td width="15%" align="center">
+                        <arrow class="right" id="arrow_next_img" onclick="img_arrow_click(this)"></arrow>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="win_browse_img_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0; z-index:9;background: silver;">
+        </div>
+        <!--浏览原图弹出窗口-->
+
+        <!--浏览日志窗口-->
+        <div id="win_view_log" onclick=""
+            style="display:none;border:1px solid #cccccc;height:610px;width:60%;position:fixed;top:15%;left:20%;z-index:15;background:white;">
+            <table width="100%" align="center" id="table_log">
+                <tr>
+                    <td>
+                        <textarea id="view_log_text" style="width:99% ;height:550px; resize:none"
+                            readonly="readonly"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div style="text-align: right;">
+                            <div class="btn"><input type="button" id="btn_close_view_log_win" value="关闭"
+                                    onclick="hide_log_win(this);" /></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="win_view_log_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0; z-index:9;background: silver;">
+        </div>
+        <!--浏览日志窗口-->
+
+        <!--数据增强详细信息窗口-->
+        <div id="win_data_augmentation_detail"
+            style="display:none;border:1px solid #cccccc;height:420px;width:55%;position:fixed;top:22%;left:22%;z-index:15;background:white;">
+            <!--title-->
+            <div
+                style="position:relative;background-color: #529EFF;min_height:30px; max-height: 60px;border-bottom: 1px solid #a4acb9;padding:2px 2px;">
+                <br>
+                <div style="font-size: 20px;">数据增强设置</div><br>
+            </div>
+            <br />
+            <!--show model informations-->
+            <table width="100%" align="center" id="table_data_augmentation_info">
+                <tr>
+                    <td>
+                        <div style="font-size: 14px;">随机亮度概率:</div>
+                    </td>
+                    <td>
+                        <input type="hidden" id="data_augmentation_task_id" value="">
+                        <input id="brightness_prob" value="0.5"
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                    <td>
+                        <div style="font-size: 14px;">亮度范围:</div>
+                    </td>
+                    <td>
+                        <input id="brightness_range" value="0.9"
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div style="font-size: 14px;">随机对比度概率:</div>
+                    </td>
+                    <td>
+                        <input id="contrast_prob" value="0.5"
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                    <td>
+                        <div style="font-size: 14px;">对比度范围:</div>
+                    </td>
+                    <td>
+                        <input id="contrast_range" value="0.9"
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div style="font-size: 14px;">随机饱和度概率:</div>
+                    </td>
+                    <td>
+                        <input id="saturation_prob" value="0.5"
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                    <td>
+                        <div style="font-size: 14px;">饱和度范围:</div>
+                    </td>
+                    <td>
+                        <input id="saturation_range" value="0.9"
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div style="font-size: 14px;">随机色调概率:</div>
+                    </td>
+                    <td>
+                        <input id="hue_prob" value="0.5"
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                    <td>
+                        <div style="font-size: 14px;">色调范围:</div>
+                    </td>
+                    <td>
+                        <input id="hue_range" value="18"
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div style="font-size: 14px;">随机上下翻转概率:</div>
+                    </td>
+                    <td>
+                        <input id="vertical_flip_prob" value="0.5"
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                    <td>
+                        <div style="font-size: 14px;">随机水平翻转概率:</div>
+                    </td>
+                    <td>
+                        <input id="horizontal_flip_prob" value="0.5"
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div style="font-size: 14px;">旋转概率:</div>
+                    </td>
+                    <td>
+                        <input id="rotate_prob" value="0.5"
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                    <td>
+                        <div style="font-size: 14px;">最大旋转角度:</div>
+                    </td>
+                    <td>
+                        <input id="rotate_range" value="30"
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text" />
+                    </td>
+                </tr>
+
+            </table>
+            <br>
+            <!--buttons-->
+            <div style="margin-top: 15px; padding: 19px 20px 20px; text-align: right; border-top: 1px solid #e5e5e5;">
+                <div class="btn"><input type="button" id="btn_hide_model_predict_win" value="取消"
+                        onclick="hide_augument_detail_parms(this);" style="background:#529EFF;" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_model_predict_test" value="保存设置"
+                        onclick="save_augument_detail_parms(this);" /></div>
+            </div>
+        </div>
+        <div id="win_data_augmentation_detail_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0; z-index:14;background: silver;">
+        </div>
+        <!--数据增强详细信息窗口-->
+
+        <!--Demo下载窗口-->
+        <div id="demo_download_win"
+            style="display:none;border:1px solid #cccccc;height:390px;width:50%;position:fixed;top:24%;left:24%;z-index:10;background:white;">
+            <!--title-->
+            <div
+                style="position:relative;background-color: #529EFF;min_height:30px; max-height: 60px;border-bottom: 1px solid #a4acb9;padding:2px 2px;">
+                <br>
+                <div style="font-size: 20px;">下载示例项目</div><br>
+            </div>
+            <br />
+            <!--demos-->
+            <table width="100%" align="center" id="download_demo_detail_info">
+                <tr>
+                    <td width="40%"><br>
+                        <label id="download_cls"><input type="checkbox" id="download_cls_label" value="下载图像分类示例项目"
+                                style="height: 12px;width: 12px;">下载图像分类示例项目</label>
+                    </td>
+                    <td>
+                        <br>
+                        <div class="progress"> <span id="cls_download_status_progress_bar_value" class="green"
+                                style="width: 0%;"><span id="cls_download_status_progress_bar">0%</span></span></div>
+                    </td>
+                    <td>&nbsp</td>
+                </tr>
+                <tr>
+                    <td width="40%"><br>
+                        <label id="download_det"><input type="checkbox" id="download_det_label" value="下载目标检测示例项目"
+                                style="height: 12px;width: 12px;">下载目标检测示例项目</label>
+                    </td>
+                    <td>
+                        <br>
+                        <div class="progress"> <span id="det_download_status_progress_bar_value" class="green"
+                                style="width: 0%;"><span id="det_download_status_progress_bar">0%</span></span></div>
+                    </td>
+                    <td>&nbsp</td>
+                </tr>
+                <tr>
+                    <td width="40%"><br>
+                        <label id="download_ins"><input type="checkbox" id="download_ins_label" value="下载实例分割示例项目"
+                                style="height: 12px;width: 12px;">下载实例分割示例项目</label>
+                    </td>
+                    <td>
+                        <br>
+                        <div class="progress"> <span id="ins_download_status_progress_bar_value" class="green"
+                                style="width: 0%;"><span id="ins_download_status_progress_bar">0%</span></span></div>
+                    </td>
+                    <td>&nbsp</td>
+                </tr>
+                <tr>
+                    <td width="40%"><br>
+                        <label id="download_seg"><input type="checkbox" id="download_seg_label" value="下载语义分割示例项目"
+                                style="height: 12px;width: 12px;">下载语义分割示例项目</label>
+                    </td>
+                    <td>
+                        <br>
+                        <div class="progress"> <span id="seg_download_status_progress_bar_value" class="green"
+                                style="width: 0%;"><span id="seg_download_status_progress_bar">0%</span></span></div>
+                    </td>
+                    <td>&nbsp</td>
+                </tr>
+            </table>
+            <br>
+            <!--buttons-->
+            <div style="margin-top: 15px; padding: 19px 20px 20px; text-align: right; border-top: 1px solid #e5e5e5;">
+                <div class="btn"><input type="button" id="btn_cancel_download_demo" style="background:#529EFF;"
+                        value="关闭窗口" onclick="hide_download_demo_win_modal();" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_download_proc" value="开始下载"
+                        onclick="download_win_btn_proc(this);" /></div>
+            </div>
+        </div>
+        <div id="demo_download_win_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0;z-index:9;background: silver;">
+        </div>
+        <!--Demo下载窗口-->
+
+        <!--模型测试窗口-->
+        <div id="win_model_predict_test"
+            style="display:none;border:1px solid #cccccc;height:540px;width:60%;position:fixed;top:16%;left:20%;z-index:10;background:white;">
+            <!--title-->
+            <div
+                style="position:relative;background-color: #529EFF;min_height:30px; max-height: 60px;border-bottom: 1px solid #a4acb9;padding:2px 2px;">
+                <br>
+                <div style="font-size: 20px;">模型测试</div><br>
+            </div>
+            <br />
+            <!--show model informations-->
+            <table width="100%" align="center" id="table_test_model_info">
+                <tr>
+                    <td>
+                        <div style="font-size: 14px;">模型名称:</div>
+                    </td>
+                    <td>
+                        <input type="hidden" id="predict_test_model_id" value="">
+                        <input id="test_model_name_text" value=""
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text"
+                            readonly="readonly" />
+                    </td>
+                    <td>
+                        <div style="font-size: 14px;">模型类型及结构:</div>
+                    </td>
+                    <td>
+                        <input id="test_model_type_text" value=""
+                            style="width:90% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text"
+                            readonly="readonly" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div style="font-size: 14px;">模型路径:</div>
+                    </td>
+                    <td colspan="3">
+                        <input id="test_model_path_text"
+                            style="width:96% ;height:20px;Float:left;padding: 4px 8px;margin-left: 4px;" type="text"
+                            readonly="readonly" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div
+                            style="margin-top: 5px; padding: 1px 1px 1px; text-align: right; border-top: 1px solid #e5e5e5;">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div style="font-size: 14px;">预测图片:</div>
+                    </td>
+                    <td colspan="3">
+                        <input type="file" id="test_model_src_img_path_text"
+                            onchange="load_predict_file_and_preview(this)"
+                            accept="image/gif,image/jpeg,image/jpg,image/bmp" style="width:96% ;height:20px;"
+                            type="text" />
+                    </td>
+                </tr>
+            </table>
+            <!--src and predict view-->
+            <div class="scroll-content">
+                <div>
+                    <table width="100%" align="center" id="model_test_predict_head">
+                        <tr>
+                            <th width="50%">预览原图</th>
+                            <th width="50%">预测结果</th>
+                        </tr>
+                    </table>
+                </div>
+                <div>
+                    <table width="100%" align="center" id="table_browse_src_and_result">
+                        <tr>
+                            <td>
+                                <div class="">
+                                    <table width="100%" align="center" id="table_img_predict_result">
+                                        <tr>
+                                            <td><img id="model_test_img_src" ondblclick="zoom_image(this)"
+                                                    align="center" style="border:1px #D6D6D6 solid;" height="200"
+                                                    width="200" hspace="0" vspace="0" /></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="">
+                                    <table width="100%" align="center" id="table_img_predict_result">
+                                        <tr>
+                                            <td><img id="model_test_img_result" ondblclick="zoom_image(this)"
+                                                    align="center" style="border:1px #D6D6D6 solid;" height="200"
+                                                    width="200" hspace="0" vspace="0" /></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <br>
+            <!--buttons-->
+            <div style="margin-top: 15px; padding: 19px 20px 20px; text-align: right; border-top: 1px solid #e5e5e5;">
+                <div class="btn"><input type="button" id="btn_hide_model_predict_win" value="取消"
+                        onclick="hide_model_test_predict_win_modal(this);" style="background:#529EFF;" /></div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn"><input type="button" id="btn_model_predict_test" value="预测"
+                        onclick="model_predict_test(this);" /></div>
+            </div>
+        </div>
+        <div id="win_model_predict_test_over"
+            style="display: none;width: 100%;height: 100%;opacity:0.8;filter:alpha(opacity=80);position:fixed;top:0;left:0; z-index:9;background: silver;">
+        </div>
+        <!--模型测试窗口-->
+
+        <div class="btn">
+            <input type="button" id="btn_refresh" style="width: 150px; height: 50px; " value="刷新项目信息"
+                onclick="javascript:refresh_contents(this);" />
+        </div>
+        <br>
+
+</body>
+
+</html>
