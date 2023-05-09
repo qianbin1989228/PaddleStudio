@@ -418,7 +418,7 @@ if __name__ == '__main__':
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/241aa364105a460aa2dd3f01728d3753.png#pic_center=x500)
 # 六、其它
 ## 6.1 联系和反馈
-PaddleStudio目前处在快速更新迭代中，相关功能模块也在不断丰富和完善。如果在使用过程中遇到问题或者有相关好的建议，可以在[PaddleStudio官网](https://github.com/PuhuaCloud/PaddleStudio)上提issue，或者也可以加入飞桨PaddleX的qq群提意见，群号：957286141。
+PaddleStudio目前处在快速更新迭代中，相关功能模块也在不断丰富和完善。如果在使用过程中遇到问题或者有相关好的建议，可以在[PaddleStudio的github官网](https://github.com/qianbin1989228/PaddleStudio)上提issue。
 
 为了更准确快速的定位所出现的异常问题，可以在使用过程中将遇到的问题通过截图形式给出，尤其是PaddleStudio后台的报错信息，建议截取出关键的Python异常代码报错提示。
 
@@ -427,6 +427,3 @@ PaddleStudio目前处在快速更新迭代中，相关功能模块也在不断�
 
 ## 6.3 教学书籍
 如果对PaddlePaddle感兴趣，想要系统学习深度学习技术或者想要系统学习PaddlePaddle框架，可以选择官方推荐的教学书籍《深度学习与图像处理PaddlePaddle》，由清华大学出版社出版，钱彬和朱会杰著（预计2023年8月出版）。除了本篇博客涉及到的PaddleStudio内容以外，书中还会详细讲解图像分类、目标检测、语义分割、实例分割、GAN图像变换等算法原理，并结合真实的项目实战案例使用PaddlePaddle全流程讲解算法研发和部署。
-## 6.4 线上GPU平台
-如果用户身边暂时没有GPU机器，那么可以使用免费的GPU云平台完成开发，例如[AI Studio](https://aistudio.baidu.com/aistudio/index)、[Kaggle](https://www.kaggle.com/)、[Google Colaboratory](https://colab.research.google.com/?hl=zh_cn)等。考虑到平台的稳定性以及额外的增值服务优势，也可以使用一些付费云平台，这里推荐使用[普华云](https://www.puhuacloud.com/login?redirect=%2Findex)，整体价格较低，并且可以提供一对一的个性化服务需求，另外，平台上有现成的PaddleStudio镜像可以直接使用，不需要再安装相关环境或依赖库。
-
