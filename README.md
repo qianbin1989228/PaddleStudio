@@ -22,7 +22,7 @@ paddle.utils.run_check()
 ## 2.2 安装依赖库
 首先下载PaddleStudio项目：
 ```bash
-git clone https://github.com/PuhuaCloud/PaddleStudio.git
+git clone https://github.com/qianbin1989228/PaddleStudio.git
 ```
 然后进入项目根目录并安装相关依赖库:
 ```bash
